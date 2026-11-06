@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Generator QR Review Google Maps</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--tx:#202124;--mut:#5f6368;--line:#dadce0;--blue:#1a73e8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17181a;--card:#222426;--tx:#e8eaed;--mut:#9aa0a6;--line:#3c4043;--blue:#8ab4f8}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:"Google Sans",Roboto,Arial,sans-serif;line-height:1.5}
+main{max-width:560px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:1.35rem;margin:8px 0 4px}
+p.sub{margin:0 0 16px;color:var(--mut);font-size:.95rem}
+.box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+label{display:block;font-weight:600;font-size:.9rem;margin-bottom:6px}
+input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;font:inherit;background:var(--bg);color:var(--tx)}
+input:focus,button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.row{display:flex;gap:8px;margin-top:10px}
+button{flex:1;padding:12px;border-radius:10px;border:0;font:inherit;font-weight:600;cursor:pointer;background:var(--blue);color:#fff}
+button.sec{background:transparent;color:var(--blue);border:1px solid var(--line)}
+button:disabled{opacity:.45;cursor:not-allowed}
+#err{color:#d93025;font-size:.9rem;min-height:1.3em;margin:8px 0 0}
+#prev{margin-top:16px;text-align:center}
+canvas{width:100%;height:auto;border-radius:16px;border:1px solid var(--line);background:#fff}
+
+footer{margin-top:28px;text-align:center}
+.donasi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 16px}
+.donasi h2{font-size:1.1rem;margin:0 0 6px}
+.donasi p{margin:0 auto 14px;color:var(--mut);font-size:.95rem;max-width:42ch}
+.donasi img{width:100%;max-width:300px;height:auto;border-radius:10px;border:1px solid var(--line);background:#fff}
+.donasi a{display:inline-block;margin-top:12px;color:var(--blue);font-weight:600;font-size:.95rem}
+footer small{display:block;margin-top:14px;color:var(--mut)}
+</style>
+</head>
+<body>
+<main>
+  <h1>Generator QR Review Google Maps</h1>
+  <p class="sub">Tempel link Google Maps, lalu unduh kartu QR siap cetak.</p>
+  <div class="box">
+    <label for="url">Link Google Maps</label>
+    <input id="url" type="url" inputmode="url" placeholder="https://maps.app.goo.gl/..." autocomplete="off">
+    <div class="row">
+      <button id="gen">Buat QR</button>
+      <button id="dl" class="sec" disabled>Unduh PNG</button>
+    </div>
+    <p id="err" role="alert"></p>
+  </div>
+  <div id="prev"><canvas id="c" width="1250" height="1250"></canvas></div>
+  <footer>
+    <div class="donasi">
+      <h2>Dukung pengembangan alat ini</h2>
+      <p>Generator ini gratis dipakai. Kalau terasa membantu usahamu, traktir aku lewat donasi. Berapa pun sangat berarti dan membantu aku terus membuat alat yang berguna.</p>
+      <img src="qris.jpg" alt="QRIS donasi atas nama Andri Irvansyah" width="300" loading="lazy">
+      <br><a href="qris.jpg" download="qris-andri.jpg">Simpan gambar QRIS</a>
+      <small>Scan dengan aplikasi bank atau e-wallet apa pun. Terima kasih atas dukungannya!</small>
+    </div>
+  </footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=1250;
+const B='#4285F4',R='#EA4335',Y='#FBBC05',G='#34A853',FONT='"Google Sans",Roboto,Helvetica,Arial,sans-serif';
+let hasQR=false;
+
+function rr(x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r)}
+function star(cx,cy,r){ctx.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rad=i%2?r*.45:r;ctx.lineTo(cx+rad*Math.cos(a),cy+rad*Math.sin(a))}ctx.closePath();ctx.fill()}
+function txt(t,x,y,size,weight,color,align){ctx.font=weight+' '+size+'px '+FONT;ctx.fillStyle=color;ctx.textAlign=align||'center';ctx.textBaseline='alphabetic';ctx.fillText(t,x,y)}
+
+function pin(x,y,s){ // x,y = top-left, s = height
+  ctx.save();ctx.translate(x,y);ctx.scale(s/230,s/230);
+  const p=new Path2D('M78 0C35 0 0 35 0 78c0 30 15 55 40 95l38 57 38-57c25-40 40-65 40-95C156 35 121 0 78 0z');
+  ctx.clip(p);
+  ctx.fillStyle=G;ctx.fillRect(0,0,156,230);
+  ctx.fillStyle=B;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(156,0);ctx.lineTo(156,50);ctx.lineTo(78,78);ctx.lineTo(30,30);ctx.closePath();ctx.fill();
+  ctx.fillStyle=R;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(50,0);ctx.lineTo(78,78);ctx.lineTo(0,110);ctx.closePath();ctx.fill();
+  ctx.fillStyle=Y;ctx.beginPath();ctx.moveTo(0,110);ctx.lineTo(78,78);ctx.lineTo(125,95);ctx.lineTo(60,170);ctx.lineTo(0,150);ctx.closePath();ctx.fill();
+  ctx.restore();
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x+78*s/230,y+78*s/230,26*s/230,0,7);ctx.fill();
+}
+
+function draw(url){
+  ctx.clearRect(0,0,W,W);
+  // background
+  ctx.save();rr(26,26,W-52,W-52,90);ctx.fillStyle='#fff';ctx.fill();
+  ctx.lineWidth=2;ctx.strokeStyle='#f0d9a0';ctx.stroke();
+  rr(36,36,W-72,W-72,80);ctx.clip();
+  // corner blobs
+  ctx.fillStyle=B;ctx.beginPath();ctx.arc(36,36,150,0,7);ctx.fill();
+  ctx.fillStyle=Y;ctx.beginPath();ctx.arc(W-36,36,170,0,7);ctx.fill();
+  ctx.fillStyle=R;ctx.beginPath();ctx.arc(36,W-36,190,0,7);ctx.fill();
+  ctx.fillStyle=G;ctx.beginPath();ctx.arc(W-36,W-36,220,0,7);ctx.fill();
+  ctx.restore();
+  // header
+  pin(232,78,230);
+  txt('Google Maps',742,205,120,'500','#3c4043');
+  rr(347,258,365,86,43);ctx.fillStyle=B;ctx.fill();
+  txt('Review Kami',529,318,48,'700','#fff');
+  ctx.fillStyle=Y;for(let i=0;i<5;i++)star(773+i*66,300,34);
+  // headings
+  txt('Bantu Kami Menjadi Lebih Baik',627,409,52,'700','#202124');
+  txt('dengan Memberikan Ulasan Anda',627,462,42,'400','#202124');
+  ctx.fillStyle='#202124';ctx.fillRect(100,392,106,2);ctx.fillRect(1048,392,106,2);
+  // QR frame
+  const fx=356,fy=491,fw=542,fh=494;
+  ctx.save();rr(fx,fy,fw,fh,48);ctx.clip();
+  const mx=fx+fw/2,my=fy+fh/2;
+  ctx.fillStyle=B;ctx.fillRect(fx,fy,mx-fx,my-fy);
+  ctx.fillStyle=R;ctx.fillRect(mx,fy,fx+fw-mx,my-fy);
+  ctx.fillStyle=Y;ctx.fillRect(fx,my,mx-fx,fy+fh-my);
+  ctx.fillStyle=G;ctx.fillRect(mx,my,fx+fw-mx,fy+fh-my);
+  ctx.restore();
+  rr(fx+14,fy+14,fw-28,fh-28,36);ctx.fillStyle='#fff';ctx.fill();
+  // QR
+  const qr=qrcode(0,'M');qr.addData(url);qr.make();
+  const n=qr.getModuleCount(),size=430,cell=size/n,ox=mx-size/2,oy=my-size/2;
+  ctx.fillStyle='#000';
+  for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(qr.isDark(r,c))ctx.fillRect(Math.floor(ox+c*cell),Math.floor(oy+r*cell),Math.ceil(cell),Math.ceil(cell));
+  // scan text
+  ctx.strokeStyle='#202124';ctx.lineWidth=5;ctx.lineJoin='round';rr(282,1000,76,110,14);ctx.stroke();
+  ctx.lineWidth=5;ctx.beginPath();
+  [[296,1030,296,1018,308,1018],[344,1018,344,1030],[296,1080,296,1092,308,1092],[344,1092,332,1092,344,1080]].forEach(a=>{});
+  ctx.strokeStyle='#202124';ctx.lineWidth=5;
+  ctx.beginPath();ctx.moveTo(298,1038);ctx.lineTo(298,1028);ctx.lineTo(312,1028);ctx.moveTo(334,1028);ctx.lineTo(344,1028);ctx.lineTo(344,1038);
+  ctx.moveTo(298,1074);ctx.lineTo(298,1084);ctx.lineTo(312,1084);ctx.moveTo(334,1084);ctx.lineTo(344,1084);ctx.lineTo(344,1074);ctx.stroke();
+  ctx.strokeStyle=Y;ctx.lineWidth=6;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(210,1028);ctx.lineTo(232,1032);ctx.moveTo(224,1002);ctx.lineTo(240,1016);ctx.moveTo(256,988);ctx.lineTo(260,1008);ctx.stroke();
+  ctx.fillStyle='#202124';ctx.fillRect(421,1016,3,86);
+  txt('Scan QR Code',481,1054,50,'700','#202124','left');
+  txt('dan Berikan Ulasan Anda',481,1096,40,'400','#202124','left');
+  ctx.strokeStyle=Y;ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(562,1122);ctx.quadraticCurveTo(700,1100,862,1112);ctx.stroke();
+  // footer pill
+  rr(318,1143,620,64,32);ctx.fillStyle='#f1f3f4';ctx.fill();
+  txt('G',373,1190,46,'700',B,'center');
+  txt('Terima Kasih atas Dukungan Anda',418,1186,30,'500','#202124','left');
+  ctx.fillStyle='#202124';ctx.font='32px '+FONT;ctx.textAlign='left';ctx.fillText('♥',872,1188);
+}
+
+function placeholder(){
+  draw('https://maps.google.com');
+  ctx.fillStyle='rgba(255,255,255,.93)';rr(371,506,512,464,34);ctx.fill();
+  txt('QR akan muncul di sini',627,750,34,'500','#5f6368');
+}
+
+const err=document.getElementById('err'),inp=document.getElementById('url'),dl=document.getElementById('dl');
+function valid(u){try{const x=new URL(u);return /^https?:$/.test(x.protocol)&&/(google\.[a-z.]+|goo\.gl|g\.co|g\.page)$/i.test(x.hostname)}catch(e){return false}}
+function gen(){
+  let u=inp.value.trim();
+  if(u&&!/^https?:\/\//i.test(u))u='https://'+u;
+  if(!valid(u)){err.textContent='Masukkan link Google Maps yang valid, misalnya https://maps.app.goo.gl/xxxx';return}
+  err.textContent='';
+  try{draw(u);hasQR=true;dl.disabled=false}catch(e){err.textContent='Link terlalu panjang untuk dibuat QR. Gunakan link pendek (maps.app.goo.gl).'}
+}
+document.getElementById('gen').onclick=gen;
+inp.addEventListener('keydown',e=>{if(e.key==='Enter')gen()});
+dl.onclick=()=>{
+  if(!hasQR)return;
+  cv.toBlob(b=>{
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(b);a.download='qr-review-gmaps.png';
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  },'image/png');
+};
+placeholder();
+</script>
+</body>
+</html>
